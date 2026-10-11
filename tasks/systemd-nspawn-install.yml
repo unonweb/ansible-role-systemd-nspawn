@@ -1,0 +1,26 @@
+---
+- tags: [role-systemd-nspawn-install]
+  block:
+    
+  # apt
+  - name: Apt install systemd-container
+    become: true
+    ansible.builtin.apt:
+      state: present
+      name: systemd-container
+
+  # mkdir /var/lib/machines
+  - name: Mkdir /var/lib/machines
+    become: true
+    ansible.builtin.file:
+      path: /var/lib/machines
+      mode: u=rwx,g=,o=
+
+  # start/enable service
+  - name: Start/Enable systemd-machined.service
+    become: true
+    ansible.builtin.systemd_service:
+      scope: system
+      name: systemd-machined.service
+      enabled: true
+      state: started

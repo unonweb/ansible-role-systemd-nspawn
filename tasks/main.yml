@@ -1,13 +1,13 @@
 ---
-- name: systemd-container role
-  tags: [role-systemd-container, role-systemd-nspawn]
+- name: systemd-nspawn
+  tags: [role-systemd-nspawn]
   block:
 
   # install
-  - ansible.builtin.import_tasks: systemd-container-install.yml
+  - ansible.builtin.import_tasks: systemd-nspawn-install.yml
  
   # nspawn containers
-  - ansible.builtin.import_tasks: systemd-nspawn-containers.yml
+  - ansible.builtin.import_tasks: systemd-nspawn-configs.yml
 
   # nspawn_service_overrides
   - ansible.builtin.import_tasks: systemd-nspawn-service-overrides.yml

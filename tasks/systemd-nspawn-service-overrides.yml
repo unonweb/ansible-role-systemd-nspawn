@@ -1,50 +1,53 @@
 ---
-# assert
-- name: Assertions for systemd_container_nspawn_containers
-  loop: "{{ systemd_container_nspawn_containers }}"
-  ansible.builtin.assert:
-    that:
-    - item.name != None
-    success_msg: "OK"
-    quiet: true
+- tags: [role-systemd-nspawn-service-overrides]
+  block:
     
-# mkdir overrides
-- name: Mkdir in /etc/systemd/system/...
-  become: true
-  loop: "{{ systemd_container_nspawn_containers }}"
-  when: 
-  - item.service_overrides is defined
-  - item.service_overrides != None
-  ansible.builtin.file:
-    path: "/etc/systemd/system/systemd-nspawn@{{ item.name }}.service.d"
-    state: directory
-    owner: root
-    group: root
-    mode: u=rwx,g=rx,o=rx
+  # assert
+  - name: Assertions for systemd_nspawn_configs
+    loop: "{{ systemd_nspawn_configs }}"
+    ansible.builtin.assert:
+      that:
+      - item.name != None
+      success_msg: "OK"
+      quiet: true
+      
+  # mkdir overrides
+  - name: Mkdir in /etc/systemd/system/...
+    become: true
+    loop: "{{ systemd_nspawn_configs }}"
+    when: 
+    - item.service_overrides is defined
+    - item.service_overrides != None
+    ansible.builtin.file:
+      path: "/etc/systemd/system/systemd-nspawn@{{ item.name }}.service.d"
+      state: directory
+      owner: root
+      group: root
+      mode: u=rwx,g=rx,o=rx
 
-# template service
-- name: Template systemd-nspawn service overrides
-  loop: "{{ systemd_container_nspawn_containers }}"
-  when: 
-  - item.state | default('present') == 'present'
-  - item.service_overrides is defined
-  - item.service_overrides != None
-  notify: systemctl --system daemon-reload
-  become: true
-  ansible.builtin.template:
-    src: service_overrides.conf.j2
-    dest: "/etc/systemd/system/systemd-nspawn@{{ item.name }}.service.d/ansible_overrides.conf"
-    owner: root
-    group: root
-    mode: 0644
+  # template service
+  - name: Template systemd-nspawn service overrides
+    loop: "{{ systemd_nspawn_configs }}"
+    when: 
+    - item.state | default('present') == 'present'
+    - item.service_overrides is defined
+    - item.service_overrides != None
+    notify: systemctl --system daemon-reload
+    become: true
+    ansible.builtin.template:
+      src: service_overrides.conf.j2
+      dest: "/etc/systemd/system/systemd-nspawn@{{ item.name }}.service.d/ansible_overrides.conf"
+      owner: root
+      group: root
+      mode: 0644
 
-# remove service files
-- name: Remove systemd-nspawn service file marked absent
-  loop: "{{ systemd_container_nspawn_containers }}"
-  when: 
-  - item.state | default('present') == 'absent'
-  notify: systemctl --system daemon-reload
-  become: true
-  ansible.builtin.file:
-    path: "/etc/systemd/system/systemd-nspawn@{{ item.name }}.service.d/ansible_overrides.conf"
-    state: absent
+  # remove service files
+  - name: Remove systemd-nspawn service file marked absent
+    loop: "{{ systemd_nspawn_configs }}"
+    when: 
+    - item.state | default('present') == 'absent'
+    notify: systemctl --system daemon-reload
+    become: true
+    ansible.builtin.file:
+      path: "/etc/systemd/system/systemd-nspawn@{{ item.name }}.service.d/ansible_overrides.conf"
+      state: absent

@@ -1,17 +1,9 @@
 ---
-# INSTALL
-# =======
-systemd_container_apt_state: present
-
-# NSPAWN
-# ======
-systemd_container_nspawn_containers_reset: false
-systemd_container_nspawn_containers:
+# CONFIG
+# ------
+systemd_nspawn_configs_reset: false
+systemd_nspawn_configs:
 # - name:
 #   state: present
 #   config:
 #   service_overrides:
-
-# HANDLERS
-# ========
-systemd_container_daemon_reload: true

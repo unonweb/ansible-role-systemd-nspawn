@@ -26,7 +26,7 @@ USAGE
 - ansible.builtin.import_role:
 	name: systemd-containers
 	vars:
-	systemd_container_nspawn_containers:
+	systemd_nspawn_configs:
 	# nextcloud-db
 	- name: nextcloud-db
 		config:
